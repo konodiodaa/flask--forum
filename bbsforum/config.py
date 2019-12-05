@@ -1,4 +1,3 @@
-
 import os
 
 DEBUG = True
@@ -11,7 +10,7 @@ DB_HOST = '127.0.0.1'
 DB_PORT = '3306'
 DB_NAME = 'bbsforum'
 
-DB_URI = 'mysql+pymysql://%s:%s@%s:%s/%s?charset=utf8' % (DB_USERNAME,DB_PASSWORD,DB_HOST,DB_PORT,DB_NAME)
+DB_URI = 'mysql+pymysql://%s:%s@%s:%s/%s?charset=utf8' % (DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
 
 SQLALCHEMY_DATABASE_URI = DB_URI
-SQLCHEMY_TRACK_MODIFICATION = False
+SQLALCHEMY_TRACK_MODIFICATIONS = False

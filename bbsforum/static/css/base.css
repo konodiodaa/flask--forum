@@ -7,5 +7,6 @@ body{
     background: #fff;
     width: 730px;
     margin: 0 auto;
+    padding: 10px;
     overflow: hidden;
 }
