@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for,session
 import config
-from app.model import User
+from app.decorator import login_required
+from app.model import User, Posts
 from exts import db
 
 app = Flask(__name__)
@@ -62,12 +63,22 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/sendpost/')
+@app.route('/sendpost/', methods=['GET', 'POST'])
+@login_required
 def sendpost():
     if request.method == 'GET':
         return render_template('sendpost.html')
     else:
-        pass
+        title = request.form.get('title')
+        content = request.form.get('content')
+        posts = Posts(title=title, content=content)
+        user_id = session.get('user_id')
+        user = User.query.filter(User.id == user_id).first()
+        posts.author = user
+        db.session.add(posts)
+        db.session.commit()
+        return redirect(url_for('index'))
+
 
 @app.context_processor
 def my_context_processor():
