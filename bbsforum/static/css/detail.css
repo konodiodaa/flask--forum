@@ -2,3 +2,37 @@
     text-align: center;
     margin-top:20px;
 }
+
+.comment-ul{
+    padding-left: 0px;
+}
+
+.comment-ul li{
+    list-style: none;
+    border-bottom: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.user-info{
+    line-height: 40px;
+    font-size: 16px;
+    color:#9b9b;
+}
+
+.user-info .username{
+    margin-left:15px;
+}
+
+.user-info .create_time{
+    float: right;
+}
+
+.comment-content{
+    margin-left: 60px;
+}

@@ -88,8 +88,8 @@ def sendpost():
 @app.route('/detail/<posts_id>')
 def detail(posts_id):
     posts = Posts.query.filter(Posts.id == posts_id).first()
-
-    return render_template('detail.html', posts=posts)
+    comment_number = len(posts.comments)
+    return render_template('detail.html', posts=posts, comment_number=comment_number)
 
 
 @app.route('/comment/', methods=['POST'])
@@ -107,6 +107,7 @@ def add_comment():
     db.session.add(comment)
     db.session.commit()
     return redirect(url_for('detail', posts_id=posts_id))
+
 
 @app.context_processor
 def my_context_processor():

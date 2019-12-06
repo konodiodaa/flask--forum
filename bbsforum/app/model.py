@@ -1,5 +1,7 @@
 import datetime
 
+from sqlalchemy import text
+
 from exts import db
 
 
@@ -30,6 +32,6 @@ class Comment(db.Model):
     content = db.Column(db.String(100), nullable=False)
     posts_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    posts = db.relationship('Posts', backref=db.backref('comments'))
+    create_time = db.Column(db.DateTime,default=datetime.datetime.now)
+    posts = db.relationship('Posts', backref=db.backref('comments', order_by=id.desc()))
     author = db.relationship('User', backref=db.backref('comments'))

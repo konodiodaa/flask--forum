@@ -16,7 +16,7 @@
     <hr>
     <p class="posts-container">{{ posts.content }}</p>
     <hr>
-    <h4>Comment: (0)</h4>
+    <h4>Comment: ({{comment_number}})</h4>
     <form action="{{ url_for('add_comment') }}" method="post">
         <div class="form-group">
             <input class="form-control" type="text" name="comment_content" placeholder="Please enter your comment">
@@ -26,9 +26,16 @@
             <button class="btn btn-primary">commit</button>
         </div>
     </form>
-    <ul>
+    <ul class="comment-ul">
         {% for comment in posts.comments %}
-            <li>{{ comment.content }}</li>
+            <li>
+                <div class="user-info">
+                    <img src="{{ url_for('static', filename='images/mudkip.png') }}" alt="" class="avatar">
+                    <span class="username">{{ comment.author.username }}</span>
+                    <span class="create_time"> {{ comment.create_time }}</span>
+                </div>
+                <p class="comment-content">{{ comment.content }}</p>
+            </li>
         {% endfor %}
 
     </ul>
