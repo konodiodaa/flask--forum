@@ -2,6 +2,26 @@
 
 {% block title %}HomePage{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/index.css') }}">
+{% endblock %}
+
 {% block main %}
-this is the main page
+    <ul class="posts-ul">
+    {% for posts in postses %}
+         <li>
+            <div class="avatar-group">
+                <img src="{{ url_for('static', filename='images/mudkip.png') }}" alt="" class="avatar">
+            </div>
+            <div class="posts-group">
+                <p class="posts-title"><a href="{{ url_for('detail',posts_id=posts.id) }}">{{ posts.title }}</a></p>
+                <p class="posts-content">{{ posts.content }}</p>
+                <div class="posts-info">
+                    <span class="posts-author">{{ posts.author.username }}</span>
+                    <span class="posts-time">{{ posts.create_time }}</span>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
 {% endblock %}

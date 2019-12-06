@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for,session
+from sqlalchemy import text
+
 import config
 from app.decorator import login_required
-from app.model import User, Posts
+from app.model import User, Posts, Comment
 from exts import db
 
 app = Flask(__name__)
@@ -11,7 +13,10 @@ db.init_app(app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    context = {
+        'postses': Posts.query.order_by(text('-create_time')).all()
+    }
+    return render_template('index.html', **context)
 
 
 @app.route('/login/', methods=['GET','POST'])
@@ -79,6 +84,29 @@ def sendpost():
         db.session.commit()
         return redirect(url_for('index'))
 
+
+@app.route('/detail/<posts_id>')
+def detail(posts_id):
+    posts = Posts.query.filter(Posts.id == posts_id).first()
+
+    return render_template('detail.html', posts=posts)
+
+
+@app.route('/comment/', methods=['POST'])
+@login_required
+def add_comment():
+    content = request.form.get('comment_content')
+    posts_id = request.form.get('posts_id')
+
+    comment = Comment(content=content)
+    user_id = session['user_id']
+    user = User.query.filter(User.id == user_id).first()
+    comment.author = user
+    posts = Posts.query.filter(Posts.id == posts_id).first()
+    comment.posts = posts
+    db.session.add(comment)
+    db.session.commit()
+    return redirect(url_for('detail', posts_id=posts_id))
 
 @app.context_processor
 def my_context_processor():

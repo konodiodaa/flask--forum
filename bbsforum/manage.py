@@ -4,7 +4,7 @@ from flask_script import Manager
 from flask_migrate import MigrateCommand, Migrate
 from run import app
 from exts import db
-from app.model import User
+from app.model import User, Comment, Posts
 
 
 manage = Manager(app)

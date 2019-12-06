@@ -10,3 +10,7 @@ body{
     padding: 10px;
     overflow: hidden;
 }
+
+.page-title{
+    text-align: center;
+}
