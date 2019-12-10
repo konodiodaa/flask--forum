@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}HomePage{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/m_comment.css') }}">
+{% endblock %}
+
+{% block main %}
+    <ul class="comments-ul">
+    {% for comment in comments %}
+         <li>
+            <div class="comments-group">
+                <p class="comments-title"><a href="{{ url_for('detail',posts_id=comment.posts.id) }}">{{ comment.posts.title }}</a></p>
+                <p class="comments-content">{{ comment.content }}</p>
+                <div class="comments-info">
+                    <span class="comments-time">
+                        {{ comment.create_time }}
+                        <form action="{{ url_for('manage_comment') }}" method="POST">
+                            <div class="form-group">
+                                <button onclick="{if(confirm('Are you sure to delete this task?'))
+                                {this.document.formname.submit();return true;}return false;}"
+                                 class="btn btn-primary" name="delete" value="{{ comment.id }}">Delete</button>
+                            </div>
+                        </form>
+                    </span>
+                </div>
+            </div>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

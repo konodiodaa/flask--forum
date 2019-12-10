@@ -1,0 +1,30 @@
+ul{
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.comments-ul li{
+    border-bottom: 1px solid #E0E0E0;
+    overflow: hidden;
+    padding: 15px 0;
+}
+
+.comments-group{
+    float:left;
+    width: 660px;
+    margin-left: 10px;
+}
+
+.comments-title a{
+    color:#259;
+    font-size:16px;
+    font-weight:900;
+}
+
+.comments-info {
+    color: #9D9D9D;
+}
+
+.comments-info .form-group{
+    float: right;
+}

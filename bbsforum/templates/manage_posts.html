@@ -3,10 +3,11 @@
 {% block title %}HomePage{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static',filename='css/index.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/m_posts.css') }}">
 {% endblock %}
 
 {% block main %}
+    <h3 style="text-align: center">Edit Your Posts</h3>
     <ul class="posts-ul">
     {% for posts in postses %}
          <li>
@@ -24,7 +25,17 @@
                     <span class="posts-author">{{ posts.author.username }}</span>
                     <span class="posts-time">{{ posts.create_time }}</span>
                 </div>
-            </div>
+                <div class="posts-info">
+                    <a href="/edit_posts/{{ posts.id }}"><button type="button" class="btn btn-primary">Edit</button></a>
+
+{#                    <form action="{{ url_for('delete_posts') }}" method="POST">#}
+{#                        <div class="form-group">#}
+{#                            <button onclick="{if(confirm('Are you sure to delete this task?'))#}
+{#                            {this.document.formname.submit();return true;}return false;}"#}
+{#                            class="btn btn-primary" name="delete" value="{{ posts.id }}">Delete</button>#}
+{#                        </div>#}
+{#                    </form>#}
+                </div>
         </li>
     {% endfor %}
     </ul>

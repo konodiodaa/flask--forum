@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %} Post your idea {% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/personal.css') }}">
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('change_personal') }}" method="POST" enctype="multipart/form-data">
+        <div class="form-container">
+            <div class="form-group">
+                <div class="avatar-group">
+                    {%  if user.photo  %}
+                        <img src="{{ url_for('static', filename=user.photo) }}" alt="" class="avatar">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/mudkip.png') }}" alt="" class="avatar">
+                    {% endif %}
+                    <p><label>Modify Your Avatar</label><input style="margin:0 auto;" class="form-control"  type="file" name="avator"></p>
+                </div>
+            </div>
+            <div class="form-group">
+                <label >Modify Your User Name</label>
+                <input type="text" class="form-control" placeholder="{{ user.username }}" name="username" >
+            </div>
+            <div class="form-group">
+                <label style="float:left; margin-right:10px;">Your User Number:</label><p>{{ user.usernumber }}</p>
+            </div>
+            <div id="modify_button"  class="form-group">
+                <button  class="btn btn-primary">Modify</button>
+            </div>
+        </div>
+    </form>
+    <div class="button-group">
+        <a href="{{ url_for('change_password') }}"><button  class="btn btn-primary" >change your password</button></a>
+        <a href="{{ url_for('manage_comment') }}"><button  class="btn btn-primary" >Manage your comments</button></a>
+        <a href="{{ url_for('manage_posts') }}"><button  class="btn btn-primary" >Manage your posts</button></a>
+    </div>
+{% endblock %}

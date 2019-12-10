@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for,session
-from sqlalchemy import text
+import os
+from flask import Flask, render_template, request, redirect, url_for, session
+from sqlalchemy import text, null
 
 import config
 from app.decorator import login_required
@@ -19,7 +20,7 @@ def index():
     return render_template('index.html', **context)
 
 
-@app.route('/login/', methods=['GET','POST'])
+@app.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html')
@@ -46,7 +47,7 @@ def register():
         password = request.form.get('password')
         cpassword = request.form.get('cpassword')
 
-    # make sure the usernumber is unique
+        # make sure the usernumber is unique
         user = User.query.filter(User.usernumber == usernumber).first()
         if user:
             return 'This user number has been registered, please choose another one!'
@@ -107,6 +108,109 @@ def add_comment():
     db.session.add(comment)
     db.session.commit()
     return redirect(url_for('detail', posts_id=posts_id))
+
+
+@app.route('/personal/')
+def personal():
+    user_id = session['user_id']
+    user = User.query.filter(User.id == user_id).first()
+    return render_template('Personal.html', user=user)
+
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+@app.route('/change_personal/', methods=['POST'])
+@login_required
+def change_personal():
+    user_id = session['user_id']
+    user = User.query.filter(User.id == user_id).first()
+    username = request.form.get('username')
+    img = request.files.get('avator')
+    if img:
+        path = basedir + "/static/images/"
+        file_path = path + img.filename
+        img.save(file_path)
+        user.photo = "images/" + img.filename
+    if username:
+        user.username = username
+
+    db.session.add(user)
+    db.session.commit()
+    return redirect(url_for('personal'))
+
+
+@app.route('/change_password/', methods=['GET', 'POST'])
+def change_password():
+    if request.method == 'GET':
+        return render_template('change_password.html')
+    else:
+        user_id = session['user_id']
+        user = User.query.filter(User.id == user_id).first()
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        cpassword = request.form.get('cpassword')
+        if old_password == user.password:
+            if new_password != cpassword:
+                return 'The two passwords are not equal, please check and fill in again!'
+            else:
+                user.username = user.username
+                user.password = new_password
+                db.session.add(user)
+                db.session.commit()
+                # register successful, jump to the login page
+                return redirect(url_for('login'))
+        else:
+            return 'The two passwords are not equal, please check and fill in again!'
+
+
+@app.route('/manage_comment/', methods=['GET', 'POST'])
+def manage_comment():
+    if request.method == 'GET':
+        user_id = session.get('user_id')
+        user = User.query.filter(User.id == user_id).first()
+        comments = {
+            'comments': Comment.query.filter(Comment.author == user).order_by(text('-create_time')).all()
+        }
+        return render_template('manage_comment.html', **comments)
+    else:
+        comment_id = request.form.get('delete')
+        comment = Comment.query.filter(Comment.id == comment_id).first()
+        db.session.delete(comment)
+        db.session.commit()
+        return redirect(url_for('manage_comment'))
+
+
+@app.route('/manage_posts/', methods=['GET', 'POST'])
+def manage_posts():
+    if request.method == 'GET':
+        user_id = session.get('user_id')
+        user = User.query.filter(User.id == user_id).first()
+        context = {
+            'postses': Posts.query.filter(Posts.author == user).order_by(text('-create_time')).all()
+        }
+        return render_template('manage_posts.html', **context)
+    else:
+        pass
+        # comment_id = request.form.get('delete')
+        # comment = Comment.query.filter(Comment.id == comment_id).first()
+        # db.session.delete(comment)
+        # db.session.commit()
+        # return redirect(url_for('manage_comment'))
+
+
+@app.route('/edit_posts/<posts_id>', methods=['GET', 'POST'])
+def edit_posts(posts_id):
+    posts = Posts.query.filter(Posts.id == posts_id).first()
+    if request.method == 'GET':
+        return render_template('edit_posts.html', posts=posts)
+    else:
+        content = request.form.get('content')
+        print("hello")
+        posts.content = content
+        db.session.add(posts)
+        db.session.commit()
+        return redirect(url_for('manage_posts'))
 
 
 @app.context_processor

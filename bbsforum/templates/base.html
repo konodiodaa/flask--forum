@@ -39,7 +39,7 @@
       </form>
       <ul class="nav navbar-nav navbar-right">
         {% if user %}
-            <li><a style="font-size: 15px;" href="#">{{ user.username }}</a></li>
+            <li><a style="font-size: 15px;" href="{{ url_for('personal') }}">{{ user.username }}</a></li>
             <li><a style="font-size: 15px;" href="{{ url_for('logout') }}">Logout</a></li>
         {% else  %}
             <li><a style="font-size: 15px;" href="{{ url_for('login') }}">Login</a></li>

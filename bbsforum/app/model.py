@@ -11,6 +11,7 @@ class User(db.Model):
     usernumber = db.Column(db.String(10), nullable=False)
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    photo = db.Column(db.String(100), default='images/mudkip.png')
 
 
 class Posts(db.Model):

@@ -1,0 +1,43 @@
+ul{
+    list-style: none;
+    padding-left: 0;
+}
+
+ul.posts-ul li{
+    border-bottom: 1px solid #E0E0E0;
+    overflow: hidden;
+    padding: 15px 0;
+}
+
+.avatar-group{
+    width: 38px;
+    height: 100%;
+
+}
+
+.avatar-group .avatar{
+    float:left;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+}
+
+.posts-group{
+    float:left;
+    width: 660px;
+    margin-left: 10px;
+}
+
+.posts-title a{
+    color:#259;
+    font-size:16px;
+    font-weight:900;
+}
+
+.posts-info{
+    text-align: right;
+}
+
+.posts-info .posts-author{
+    margin-right:20px;
+}
