@@ -27,11 +27,16 @@ def login():
     else:
         usernumber = request.form.get('usernumber')
         password = request.form.get('password')
+        auto = request.form.get('auto_login')
+        print(auto)
         user = User.query.filter(User.usernumber == usernumber, User.password == password).first()
         if user:
             session['user_id'] = user.id
-            # setting the function of no require login for 31 days
-            session.permanent = True
+            if auto == 'True':
+                # setting the function of no require login for 31 days
+                session.permanent = True
+            else:
+                session.permanent = False
             return redirect(url_for('index'))
         else:
             return 'Error on User Number or Password, Please check and try again'
@@ -76,8 +81,9 @@ def sendpost():
         return render_template('sendpost.html')
     else:
         title = request.form.get('title')
+        sub_title = request.form.get('subtitle')
         content = request.form.get('content')
-        posts = Posts(title=title, content=content)
+        posts = Posts(title=title, content=content, sub_title=sub_title)
         user_id = session.get('user_id')
         user = User.query.filter(User.id == user_id).first()
         posts.author = user
@@ -205,9 +211,12 @@ def edit_posts(posts_id):
     if request.method == 'GET':
         return render_template('edit_posts.html', posts=posts)
     else:
+        sub_title = request.form.get('subtitle')
         content = request.form.get('content')
-        print("hello")
-        posts.content = content
+        if sub_title:
+            posts.sub_title = sub_title
+        if content:
+            posts.content = content
         db.session.add(posts)
         db.session.commit()
         return redirect(url_for('manage_posts'))
