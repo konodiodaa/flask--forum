@@ -2,6 +2,8 @@ import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from sqlalchemy import text, null
 
+from app.forms import LoginForm, RegisterForm, NewPassword, AddComment
+
 import config
 from app.decorator import login_required
 from app.model import User, Posts, Comment
@@ -23,12 +25,12 @@ def index():
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('login.html')
+        return render_template('login.html', form=LoginForm())
     else:
-        usernumber = request.form.get('usernumber')
-        password = request.form.get('password')
+        form = LoginForm(request.form)
+        usernumber = form.usernumber.data
+        password = form.password.data
         auto = request.form.get('auto_login')
-        print(auto)
         user = User.query.filter(User.usernumber == usernumber, User.password == password).first()
         if user:
             session['user_id'] = user.id
@@ -40,19 +42,19 @@ def login():
             return redirect(url_for('index'))
         else:
             flash('Error on User Number or Password, Please check and try again')
-            return render_template('login.html')
+            return render_template('login.html', form=LoginForm())
 
 
 @app.route('/register/', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('register.html', form=RegisterForm())
     else:
-        usernumber = request.form.get('usernumber')
-        username = request.form.get('username')
-        password = request.form.get('password')
-        cpassword = request.form.get('cpassword')
-
+        form = RegisterForm(request.form)
+        usernumber = form.usernumber.data
+        username = form.username.data
+        password = form.password.data
+        cpassword = form.cpassword.data
         # make sure the usernumber is unique
         user = User.query.filter(User.usernumber == usernumber).first()
         if user:
@@ -97,15 +99,33 @@ def sendpost():
 def detail(posts_id):
     posts = Posts.query.filter(Posts.id == posts_id).first()
     comment_number = len(posts.comments)
-    return render_template('detail.html', posts=posts, comment_number=comment_number)
+    return render_template('detail.html', posts=posts, comment_number=comment_number, form=AddComment())
+
+
+@app.route('/collect_posts/<posts_id>')
+def collect(posts_id):
+    add_collection = True
+    user_id = session['user_id']
+    user = User.query.filter(User.id == user_id).first()
+    posts = Posts.query.get(posts_id)
+    all_collections = user.postses.all()
+    for collection in all_collections:
+        if collection == posts:
+            add_collection = False
+            break
+    if add_collection:
+        user.postses.append(posts)
+        db.session.add(posts)
+        db.session.commit()
+    return redirect(url_for('detail', posts_id=posts_id))
 
 
 @app.route('/comment/', methods=['POST'])
 @login_required
 def add_comment():
-    content = request.form.get('comment_content')
-    posts_id = request.form.get('posts_id')
-
+    form = AddComment(request.form)
+    content = form.content.data
+    posts_id = form.posts_id.data
     comment = Comment(content=content)
     user_id = session['user_id']
     user = User.query.filter(User.id == user_id).first()
@@ -148,15 +168,17 @@ def change_personal():
 
 
 @app.route('/change_password/', methods=['GET', 'POST'])
+@login_required
 def change_password():
     if request.method == 'GET':
-        return render_template('change_password.html')
+        return render_template('change_password.html', form=NewPassword())
     else:
+        form = NewPassword(request.form)
         user_id = session['user_id']
         user = User.query.filter(User.id == user_id).first()
-        old_password = request.form.get('old_password')
-        new_password = request.form.get('new_password')
-        cpassword = request.form.get('cpassword')
+        old_password = form.old_password.data
+        new_password = form.new_password.data
+        cpassword = form.cpassword.data
         if old_password == user.password:
             if new_password != cpassword:
                 return 'The two passwords are not equal, please check and fill in again!'
@@ -166,12 +188,13 @@ def change_password():
                 db.session.add(user)
                 db.session.commit()
                 # register successful, jump to the login page
-                return redirect(url_for('login'))
+                return redirect(url_for('personal'))
         else:
-            return 'The two passwords are not equal, please check and fill in again!'
+            return 'The original password is worry check out and try again!'
 
 
 @app.route('/manage_comment/', methods=['GET', 'POST'])
+@login_required
 def manage_comment():
     if request.method == 'GET':
         user_id = session.get('user_id')
@@ -188,22 +211,45 @@ def manage_comment():
         return redirect(url_for('manage_comment'))
 
 
+@app.route('/manage_collections/', methods=['GET', 'POST'])
+def manage_collections():
+    user_id = session.get('user_id')
+    user = User.query.filter(User.id == user_id).first()
+    context = {
+        'postses': user.postses.all()
+    }
+    return render_template('manage_collections.html', **context)
+
+
+@app.route('/delete_collection/<posts_id>', methods=['GET', 'POST'])
+def delete_collection(posts_id):
+    user_id = session.get('user_id')
+    user = User.query.filter(User.id == user_id).first()
+    post = user.postses.first()
+    user.postses.remove(post)
+    db.session.commit()
+    return redirect(url_for('manage_collections'))
+
+
 @app.route('/manage_posts/', methods=['GET', 'POST'])
 def manage_posts():
-    if request.method == 'GET':
-        user_id = session.get('user_id')
-        user = User.query.filter(User.id == user_id).first()
-        context = {
-            'postses': Posts.query.filter(Posts.author == user).order_by(text('-create_time')).all()
-        }
-        return render_template('manage_posts.html', **context)
-    else:
-        pass
-        # comment_id = request.form.get('delete')
-        # comment = Comment.query.filter(Comment.id == comment_id).first()
-        # db.session.delete(comment)
-        # db.session.commit()
-        # return redirect(url_for('manage_comment'))
+    user_id = session.get('user_id')
+    user = User.query.filter(User.id == user_id).first()
+    context = {
+        'postses': Posts.query.filter(Posts.author == user).order_by(text('-create_time')).all()
+    }
+    return render_template('manage_posts.html', **context)
+
+
+@app.route('/delete_posts/<posts_id>', methods=['GET', 'POST'])
+def delete_posts(posts_id):
+    posts = Posts.query.get(posts_id)
+    comments = Comment.query.filter(Comment.posts_id == posts_id)
+    for comment in comments:
+        db.session.delete(comment)
+    db.session.delete(posts)
+    db.session.commit()
+    return redirect(url_for('manage_posts'))
 
 
 @app.route('/edit_posts/<posts_id>', methods=['GET', 'POST'])

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}HomePage{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/m_posts.css') }}">
+{% endblock %}
+
+{% block main %}
+    <h3 style="text-align: center">Edit Your Posts</h3>
+    <ul class="posts-ul">
+    {% for posts in postses %}
+         <li>
+            <div class="avatar-group">
+                {%  if posts.author.photo  %}
+                        <img src="{{ url_for('static', filename=posts.author.photo) }}" alt="" class="avatar">
+                {% else %}
+                        <img src="{{ url_for('static', filename='images/mudkip.png') }}" alt="" class="avatar">
+                {% endif %}
+            </div>
+            <div class="posts-group">
+                <p class="posts-title"><a href="{{ url_for('detail',posts_id=posts.id) }}">{{ posts.title }}</a></p>
+                <p class="posts-content">{{ posts.sub_title }}</p>
+                <div class="posts-info">
+                    <span class="posts-author">{{ posts.author.username }}</span>
+                    <span class="posts-time">{{ posts.create_time }}</span>
+                </div>
+                <div class="posts-info">
+                    <a href="/delete_collection/{{ posts.id }}">
+                            <button onclick="{if(confirm('Are you sure to delete this posts?'))
+                            {this.document.formname.submit();return true;}return false;}"
+                            class="btn btn-primary" name="delete" value="{{ posts.id }}">Delete</button>
+                    </a>
+                </div>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
